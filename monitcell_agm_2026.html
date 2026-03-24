@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주식회사 모닛셀 | 제7기 정기주주총회</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --key:#e95457; --key2:#f07275; --key-pale:#fef0f0; --key-border:#f5bcbd;
+  --navy:#0B1630; --navy2:#162247; --white:#FFFFFF; --off:#F4F6FA;
+  --dark:#1A2540; --gray:#6B7592; --gray2:#9DAABB;
+  --gold:#E8A030; --green:#38A169; --red:#e95457;
+  --card:rgba(255,255,255,0.95); --cb:#E2E8F0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;background:var(--navy);color:var(--white);overflow:hidden;}
+#app{display:flex;height:100vh;}
+
+/* ── SIDEBAR ── */
+#sidebar{width:212px;min-width:212px;background:rgba(0,0,0,0.28);border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;overflow-y:auto;}
+.sbl{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.sbl .ln{font-size:17px;font-weight:800;color:var(--white);letter-spacing:-0.5px;}
+.sbl .ls{font-size:10px;color:var(--gray2);margin-top:2px;}
+.ss{padding:13px 16px 4px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--key2);font-weight:700;}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;font-size:12px;color:var(--gray2);line-height:1.35;}
+.ni:hover{background:rgba(233,84,87,0.07);color:var(--white);}
+.ni.active{background:rgba(233,84,87,0.12);border-left-color:var(--key);color:var(--key2);font-weight:600;}
+.nd{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;opacity:0.7;}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#slide-area{flex:1;overflow:hidden;position:relative;}
+.slide{position:absolute;inset:0;padding:0;display:none;flex-direction:column;overflow-y:auto;}
+.slide.active{display:flex;}
+#bbar{height:50px;min-height:50px;background:rgba(0,0,0,0.22);border-top:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;padding:0 22px;}
+.btn{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--white);padding:7px 18px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s;font-family:inherit;}
+.btn:hover{background:rgba(233,84,87,0.2);border-color:var(--key);}
+.btn:disabled{opacity:0.25;cursor:not-allowed;}
+.pb{flex:1;max-width:180px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 14px;}
+.pf{height:100%;background:var(--key);border-radius:2px;transition:width .3s;}
+
+/* ── SLIDE INNER LAYOUT ── */
+.s-wrap{padding:0 48px 28px;display:flex;flex-direction:column;flex:1;}
+.topbar{background:var(--navy);padding:10px 48px 10px;border-left:6px solid var(--key);margin-bottom:22px;flex-shrink:0;}
+.topbar .lbl{font-size:9px;color:var(--key2);letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin-bottom:3px;}
+.topbar .ttl{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.4px;line-height:1.2;}
+.card{background:var(--card);border:1px solid var(--cb);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:var(--key);}
+.card.gold::before{background:var(--gold);}
+.card.green::before{background:var(--green);}
+.card.plain::before{display:none;}
+.card-head{font-size:9px;color:var(--key);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.card-head.gold{color:var(--gold);}
+.card-head.green{color:var(--green);}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.kpi{background:var(--card);border:1px solid var(--cb);border-radius:10px;padding:12px 14px;}
+.kpi.hi{background:var(--key-pale);border-color:var(--key-border);}
+.kpi .kl{font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.kpi .kv{font-size:20px;font-weight:800;color:var(--dark);line-height:1;}
+.kpi.hi .kv{color:var(--key);}
+.kpi.rk .kv{color:var(--key);}
+.kpi .kv2{font-size:10px;color:var(--gray2);margin-top:3px;}
+.tcol{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.br{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EEF1F6;font-size:12px;}
+.br:last-child{border-bottom:none;}
+.br .n{color:var(--gray);}
+.br .v{color:var(--dark);font-weight:600;}
+.br.tot{background:var(--key-pale);border-radius:6px;padding:6px 8px;margin-top:4px;border:none;}
+.br.tot .n{color:var(--dark);font-weight:700;}
+.br.tot .v{color:var(--key);font-weight:800;font-size:13px;}
+.br.rv .v{color:var(--key);}
+
+/* ── COVER ── */
+#s0{background:var(--navy);padding:0;}
+.cover-inner{display:flex;flex-direction:column;justify-content:center;height:100%;padding:0 64px;}
+.cover-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(233,84,87,0.1);border:1px solid rgba(233,84,87,0.3);color:var(--key2);font-size:10px;letter-spacing:1.5px;padding:5px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:22px;width:fit-content;}
+.cover-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--key2);display:inline-block;}
+.cover-h{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1.1;margin-bottom:14px;}
+.cover-h span{color:var(--key2);}
+.cover-divider{width:56px;height:4px;background:var(--key);border-radius:2px;margin:14px 0 22px;}
+.cover-meta{font-size:13px;color:var(--gray2);line-height:2.2;margin-bottom:28px;}
+.cover-meta strong{color:var(--white);}
+.cover-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:660px;}
+.cstat{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;}
+.cstat .lbl{font-size:9px;color:var(--key);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;font-weight:600;}
+.cstat .val{font-size:16px;font-weight:700;color:var(--white);}
+.cstat .sub{font-size:10px;color:var(--gray2);margin-top:2px;}
+
+/* ── AGENDA ── */
+.agenda-card{background:var(--card);border:1px solid var(--cb);border-radius:14px;padding:20px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .18s;border-left:4px solid var(--key);}
+.agenda-card:hover{background:#FEF6F6;border-color:var(--key-border);transform:translateX(4px);}
+.agenda-card.gold-l{border-left-color:var(--gold);}
+.agenda-card.gold-l:hover{background:#FFFBF0;border-color:#F0D9AA;}
+.a-num{width:38px;height:38px;border-radius:9px;background:var(--key-pale);border:1px solid var(--key-border);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--key);flex-shrink:0;}
+.a-num.gold{background:#FFFBF0;border-color:#F0D9AA;color:var(--gold);}
+.a-body .t{font-size:14.5px;font-weight:700;color:var(--dark);margin-bottom:4px;}
+.a-body .d{font-size:11.5px;color:var(--gray);line-height:1.7;}
+.a-badge{margin-left:auto;font-size:9.5px;padding:3px 9px;border-radius:4px;font-weight:700;flex-shrink:0;}
+.a-badge.red{background:rgba(233,84,87,0.1);border:1px solid rgba(233,84,87,0.25);color:var(--key);}
+.a-badge.gold{background:rgba(232,160,48,0.1);border:1px solid rgba(232,160,48,0.25);color:var(--gold);}
+
+/* ── PL BARS ── */
+.pl-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;}
+.pl-row.hi{background:rgba(233,84,87,0.06);}
+.pl-row.pos-hi{background:rgba(56,161,105,0.06);}
+.pl-lbl{font-size:11.5px;color:var(--gray);width:118px;flex-shrink:0;}
+.pl-lbl.bold{color:var(--dark);font-weight:700;}
+.pl-bar-wrap{flex:1;height:12px;}
+.pl-bar{height:100%;border-radius:3px;}
+.pl-val{font-size:12px;font-weight:700;min-width:72px;text-align:right;}
+.pl-val.pos{color:#1A7F64;}
+.pl-val.neg{color:var(--key);}
+
+/* ── TIMELINE ── */
+.tl-row{display:flex;gap:0;align-items:stretch;}
+.tl-line{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0;}
+.tl-dot{width:12px;height:12px;border-radius:50%;background:var(--key);border:2px solid var(--off);flex-shrink:0;margin-top:14px;}
+.tl-dot.gold{background:var(--gold);}
+.tl-vline{flex:1;width:2px;background:#E2E8F0;}
+.tl-card{flex:1;background:var(--card);border:1px solid var(--cb);border-radius:9px;padding:11px 14px;margin:6px 0 6px 4px;border-left:4px solid var(--key);}
+.tl-card.gold{border-left-color:var(--gold);}
+.tl-period{font-size:9px;color:var(--key);letter-spacing:1px;font-weight:700;margin-bottom:2px;}
+.tl-period.gold{color:var(--gold);}
+.tl-name{font-size:12px;font-weight:700;color:var(--dark);margin-bottom:2px;}
+.tl-amount{font-size:18px;font-weight:900;color:var(--key);}
+.tl-amount.gold{color:var(--gold);}
+.tl-note{font-size:10px;color:var(--gray2);margin-top:1px;}
+
+/* ── RESOLUTION ── */
+.resolution-box{background:var(--navy);border-left:8px solid var(--key);border-radius:12px;padding:24px 28px;margin-bottom:18px;text-align:center;}
+.resolution-box .r-lbl{font-size:9px;color:var(--key2);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.resolution-box .r-title{font-size:16px;color:var(--gray2);margin-bottom:12px;}
+.resolution-box .r-amount{font-size:56px;font-weight:900;color:var(--key);line-height:1;}
+.resolution-box .r-sub{font-size:12px;color:var(--gray2);margin-top:6px;}
+th.thr{background:var(--key-pale);color:var(--key);font-size:10px;letter-spacing:0.5px;padding:9px 12px;text-align:left;border-bottom:1px solid var(--key-border);}
+td.tdc{padding:9px 12px;font-size:12px;color:var(--dark);border-bottom:1px solid #EEF1F6;}
+
+/* ── CENTERS GRID ── */
+.center-card{background:var(--card);border:1px solid var(--cb);border-radius:9px;padding:12px 13px;border-top:4px solid var(--green);}
+.center-card.q1-done{border-top-color:var(--key);background:#FEF8F8;}
+.center-card.planned{border-top-color:var(--gold);background:#FFFBF0;opacity:0.85;}
+.cc-num{font-size:8.5px;color:var(--green);font-weight:700;letter-spacing:1px;margin-bottom:3px;}
+.cc-num.red{color:var(--key);}
+.cc-num.gold{color:var(--gold);}
+.cc-name{font-size:12px;font-weight:700;color:var(--dark);margin-bottom:2px;}
+.cc-when{font-size:10px;color:var(--gray);}
+.cc-badge{font-size:9px;padding:2px 7px;border-radius:4px;margin-top:7px;display:inline-block;font-weight:600;}
+.badge-green{background:rgba(56,161,105,0.12);color:var(--green);border:1px solid rgba(56,161,105,0.25);}
+.badge-red{background:rgba(233,84,87,0.12);color:var(--key);border:1px solid rgba(233,84,87,0.25);}
+.badge-gold{background:rgba(232,160,48,0.12);color:var(--gold);border:1px solid rgba(232,160,48,0.25);}
+.milestone-bar{background:var(--navy);border-radius:10px;padding:14px 20px;display:flex;align-items:center;justify-content:space-around;margin-top:12px;}
+.ms-item .ms-lbl{font-size:9px;text-align:center;letter-spacing:0.5px;font-weight:700;margin-bottom:2px;}
+.ms-item .ms-val{font-size:22px;font-weight:900;text-align:center;}
+.ms-div{width:1px;height:40px;background:rgba(255,255,255,0.1);}
+
+/* ── SHARE TABLE ── */
+.share-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.share-tbl th{background:var(--key-pale);color:var(--key);font-size:10px;font-weight:700;padding:9px 11px;text-align:left;border-bottom:1px solid var(--key-border);}
+.share-tbl td{padding:8px 11px;border-bottom:1px solid #EEF1F6;color:var(--dark);}
+.share-tbl tr.total td{background:var(--key-pale);font-weight:700;border-bottom:none;}
+.share-bar-bg{background:#EEF1F6;border-radius:3px;height:5px;width:80px;}
+.share-bar-fill{height:5px;border-radius:3px;background:var(--key);}
+
+/* ── PLAN CARDS ── */
+.plan-card{background:var(--card);border:1px solid var(--cb);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;border-left:4px solid var(--key);}
+.plan-card.gold-l{border-left-color:var(--gold);}
+.plan-icon{width:38px;height:38px;border-radius:9px;background:var(--key-pale);border:1px solid var(--key-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.plan-icon.gold{background:#FFFBF0;border-color:#F0D9AA;}
+.plan-t{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:3px;}
+.plan-d{font-size:11px;color:var(--gray);line-height:1.75;}
+.bottom-summary{background:var(--navy);border-radius:10px;padding:14px 20px;display:flex;align-items:center;justify-content:space-around;margin-top:14px;}
+.bs-item .bs-lbl{font-size:9px;text-align:center;color:var(--gray2);letter-spacing:0.5px;margin-bottom:2px;}
+.bs-item .bs-val{font-size:18px;font-weight:900;text-align:center;}
+.bs-div{width:1px;height:36px;background:rgba(255,255,255,0.1);}
+
+/* ── NOTE BAR ── */
+.note-bar{background:#F8F9FC;border:1px solid #E2E8F0;border-radius:8px;padding:9px 14px;font-size:11px;color:var(--gray);line-height:1.7;margin-top:12px;}
+.note-bar.red{background:var(--key-pale);border-color:var(--key-border);}
+.note-bar.gold{background:#FFFBF0;border-color:#F0D9AA;}
+
+/* ── CLOSING ── */
+#s14{background:var(--navy);padding:0;}
+.close-inner{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:100%;padding:0 64px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sbl"><div class="ln">모닛셀</div><div class="ls">제7기 정기주주총회 · 2026</div></div>
+  <div class="ss">섹션 1 — 안건</div>
+  <div class="ni" data-i="0"><span class="nd"></span>표지</div>
+  <div class="ni" data-i="1"><span class="nd"></span>안건 목록</div>
+  <div class="ni" data-i="2"><span class="nd"></span>제1의안 — 결산 보고</div>
+  <div class="ni" data-i="3"><span class="nd"></span>제1의안 — 재무상태표</div>
+  <div class="ni" data-i="4"><span class="nd"></span>제1의안 — 손익계산서</div>
+  <div class="ni" data-i="5"><span class="nd"></span>제1의안 — 투자 유치</div>
+  <div class="ni" data-i="6"><span class="nd"></span>제2의안 — 임원 보수</div>
+  <div class="ss">섹션 2 — 현황 &amp; 계획</div>
+  <div class="ni" data-i="7"><span class="nd"></span>회사 개요</div>
+  <div class="ni" data-i="8"><span class="nd"></span>2025 매출 실적</div>
+  <div class="ni" data-i="9"><span class="nd"></span>센터 확장 현황</div>
+  <div class="ni" data-i="10"><span class="nd"></span>지분 현황</div>
+  <div class="ni" data-i="11"><span class="nd"></span>2026 계획 — 인프라</div>
+  <div class="ni" data-i="12"><span class="nd"></span>2026 계획 — R&amp;D</div>
+  <div class="ni" data-i="13"><span class="nd"></span>2026 계획 — 재무</div>
+  <div class="ni" data-i="14"><span class="nd"></span>클로징</div>
+</div>
+
+<div id="main">
+<div id="slide-area">
+
+<!-- 0: COVER -->
+<div class="slide active" id="s0">
+  <div class="cover-inner">
+    <div class="cover-badge">2026년 3월 31일 · 제7기 정기주주총회</div>
+    <div class="cover-h">주식회사<br><span>모닛셀</span></div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta">
+      <strong>대표이사</strong> 조승욱 &nbsp;|&nbsp; <strong>설립</strong> 2019년 11월 15일<br>
+      <strong>사업장</strong> 서울특별시 강남구 테헤란로 520 삼안빌딩 7층
+    </div>
+    <div class="cover-stats">
+      <div class="cstat"><div class="lbl">임직원</div><div class="val">25명</div><div class="sub">무급 등기이사 포함</div></div>
+      <div class="cstat"><div class="lbl">2025 매출</div><div class="val">9.1억원</div><div class="sub">전기 대비 +1,078%</div></div>
+      <div class="cstat"><div class="lbl">투자 유치</div><div class="val">약 62.6억</div><div class="sub">민간+정부 포함</div></div>
+      <div class="cstat"><div class="lbl">전국 센터</div><div class="val">9개소</div><div class="sub">2026 1Q 기준</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 1: 안건 목록 -->
+<div class="slide" id="s1">
+  <div class="topbar"><div class="lbl">SECTION 01 · AGENDA</div><div class="ttl">제7기 정기주주총회 안건</div></div>
+  <div class="s-wrap" style="gap:14px;">
+    <div class="agenda-card" onclick="goSlide(2)">
+      <div class="a-num">1</div>
+      <div class="a-body">
+        <div class="t">제1의안 — 결산 보고의 건</div>
+        <div class="d">2025년도(제7기) 재무제표 확정 및 보고 · 매출액 9.1억 · 영업손실 △11.9억 · 당기순손실 △11.6억<br>2025년 시리즈A 투자유치 내용 포함 보고</div>
+      </div>
+      <div class="a-badge red">보고 안건</div>
+    </div>
+    <div class="agenda-card gold-l" onclick="goSlide(6)">
+      <div class="a-num gold">2</div>
+      <div class="a-body">
+        <div class="t">제2의안 — 임원보수 한도 승인의 건</div>
+        <div class="d">2026년도 등기임원 전체 보수 한도 설정 승인<br>등기임원 3인 기준 (대표이사 조승욱, 사내이사 정은숙·김남철)</div>
+      </div>
+      <div class="a-badge gold">결의 안건</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2: 결산 보고 -->
+<div class="slide" id="s2">
+  <div class="topbar"><div class="lbl">제1의안 · 결산 보고</div><div class="ttl">2025년도 재무제표 요약</div></div>
+  <div class="s-wrap">
+    <div class="krow">
+      <div class="kpi hi"><div class="kl">매출액</div><div class="kv">9.1억원</div><div class="kv2">전기 대비 +1,078%</div></div>
+      <div class="kpi"><div class="kl">매출총이익</div><div class="kv">5.6억원</div><div class="kv2">매출총이익률 60.9%</div></div>
+      <div class="kpi rk"><div class="kl">영업손실</div><div class="kv">△11.9억</div><div class="kv2">판관비 17.4억 집중</div></div>
+      <div class="kpi rk"><div class="kl">당기순손실</div><div class="kv">△11.6억</div><div class="kv2">전기 △10.2억 대비</div></div>
+    </div>
+    <div class="tcol">
+      <div class="card">
+        <div class="card-head">재무상태 (2025.12.31)</div>
+        <div class="br"><span class="n">자산 총계</span><span class="v" style="color:var(--key)">57.9억원</span></div>
+        <div class="br"><span class="n">부채 총계</span><span class="v">1.5억원</span></div>
+        <div class="br"><span class="n">자본 총계</span><span class="v" style="color:var(--key)">56.4억원</span></div>
+        <div class="br rv"><span class="n">미처리결손금</span><span class="v">△47.8억원</span></div>
+        <div class="note-bar" style="margin-top:10px;">※ 부채비율 2.7% — 재무 안정성 매우 우수<br>※ 시리즈A 투자 유치로 자본 대폭 증가</div>
+      </div>
+      <div class="card">
+        <div class="card-head">주요 매출 구성</div>
+        <div class="br"><span class="n">SVF 서비스 매출</span><span class="v">4.53억원</span></div>
+        <div class="br"><span class="n">줄기세포센터 컨설팅</span><span class="v">3.96억원</span></div>
+        <div class="br"><span class="n">임대료·관리비 수입</span><span class="v">0.61억원</span></div>
+        <div class="br tot"><span class="n">합계</span><span class="v">9.1억원</span></div>
+        <div class="note-bar" style="margin-top:10px;">※ 거래처: 365mc 강남·대전·부산·노원·교대·대구,<br>&nbsp;&nbsp;&nbsp;365웰 정형외과, ㈜삼육오엠씨 등</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3: 재무상태표 -->
+<div class="slide" id="s3">
+  <div class="topbar"><div class="lbl">제1의안 · 재무제표</div><div class="ttl">재무상태표 (제7기 vs 제6기)</div></div>
+  <div class="s-wrap">
+    <div class="tcol" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="card-head">자 산</div>
+        <div class="br"><span class="n">유동자산</span><span class="v" style="color:var(--key)">40.7억 <span style="font-size:10px;background:rgba(56,161,105,0.1);color:var(--green);padding:1px 5px;border-radius:3px;">▲ 14.3배</span></span></div>
+        <div class="br" style="padding-left:10px;"><span class="n" style="font-size:11px;">ㄴ 정기예·적금</span><span class="v" style="font-size:11px;">20.0억</span></div>
+        <div class="br" style="padding-left:10px;"><span class="n" style="font-size:11px;">ㄴ 단기매매증권</span><span class="v" style="font-size:11px;">12.3억</span></div>
+        <div class="br" style="padding-left:10px;"><span class="n" style="font-size:11px;">ㄴ 보통예금·외상매출금 등</span><span class="v" style="font-size:11px;">8.4억</span></div>
+        <div class="br"><span class="n">비유동자산</span><span class="v">17.2억</span></div>
+        <div class="br" style="padding-left:10px;"><span class="n" style="font-size:11px;">ㄴ 유형자산 (비품·시설장치)</span><span class="v" style="font-size:11px;">13.4억</span></div>
+        <div class="br" style="padding-left:10px;"><span class="n" style="font-size:11px;">ㄴ 임차보증금 등</span><span class="v" style="font-size:11px;">3.8억</span></div>
+        <div class="br tot"><span class="n">자산 총계</span><span class="v">57.9억원</span></div>
+      </div>
+      <div class="card">
+        <div class="card-head">부채 및 자본</div>
+        <div class="br"><span class="n">유동부채 (미지급금·예수금)</span><span class="v">0.97억</span></div>
+        <div class="br"><span class="n">비유동부채 (임대보증금)</span><span class="v">0.56억</span></div>
+        <div class="br tot" style="margin-bottom:10px;--key:#38A169;"><span class="n">부채 총계</span><span class="v" style="color:var(--green)">1.54억원</span></div>
+        <div class="br"><span class="n">자본금</span><span class="v">4.61억</span></div>
+        <div class="br"><span class="n">주식발행초과금</span><span class="v">99.6억</span></div>
+        <div class="br rv"><span class="n">미처리결손금</span><span class="v">△47.8억</span></div>
+        <div class="br tot"><span class="n">자본 총계</span><span class="v">56.4억원</span></div>
+      </div>
+    </div>
+    <div class="note-bar red">✅ <strong style="color:var(--dark)">부채비율 2.7%</strong> — 재무구조 매우 우수 &nbsp;|&nbsp; 📈 <strong style="color:var(--dark)">자산 총계</strong> 전기 18.1억 → 당기 57.9억 (시리즈A 반영) &nbsp;|&nbsp; ⚠️ <strong style="color:var(--key)">미처리결손금 47.8억</strong> — 성장 투자 단계 지속</div>
+  </div>
+</div>
+
+<!-- 4: 손익계산서 -->
+<div class="slide" id="s4">
+  <div class="topbar"><div class="lbl">제1의안 · 재무제표</div><div class="ttl">손익계산서 (제7기 vs 제6기)</div></div>
+  <div class="s-wrap">
+    <div class="tcol">
+      <div class="card">
+        <div class="card-head">손익 흐름</div>
+        <div class="pl-row pos-hi">
+          <div class="pl-lbl bold">매출액</div>
+          <div class="pl-bar-wrap"><div class="pl-bar" style="width:52%;background:rgba(26,127,100,0.4);"></div></div>
+          <div class="pl-val pos">9.1억</div>
+        </div>
+        <div class="pl-row">
+          <div class="pl-lbl">(-) 매출원가</div>
+          <div class="pl-bar-wrap"><div class="pl-bar" style="width:20%;background:rgba(233,84,87,0.25);"></div></div>
+          <div class="pl-val neg">△3.6억</div>
+        </div>
+        <div class="pl-row pos-hi">
+          <div class="pl-lbl bold">매출총이익</div>
+          <div class="pl-bar-wrap"><div class="pl-bar" style="width:32%;background:rgba(26,127,100,0.35);"></div></div>
+          <div class="pl-val pos">5.6억</div>
+        </div>
+        <div class="pl-row">
+          <div class="pl-lbl">(-) 판매비·관리비</div>
+          <div class="pl-bar-wrap"><div class="pl-bar" style="width:100%;background:rgba(233,84,87,0.35);"></div></div>
+          <div class="pl-val neg">△17.4억</div>
+        </div>
+        <div class="pl-row hi" style="margin-top:4px;border-top:1px solid #EEF1F6;padding-top:10px;">
+          <div class="pl-lbl bold">영업손실</div>
+          <div class="pl-bar-wrap"><div class="pl-bar" style="width:68%;background:rgba(233,84,87,0.5);"></div></div>
+          <div class="pl-val neg" style="font-size:13.5px;">△11.9억</div>
+        </div>
+        <div class="pl-row">
+          <div class="pl-lbl">(+) 영업외수익</div>
+          <div class="pl-bar-wrap"><div class="pl-bar" style="width:2%;background:rgba(26,127,100,0.4);"></div></div>
+          <div class="pl-val pos">+0.32억</div>
+        </div>
+        <div class="pl-row hi" style="border:1px solid var(--key-border);border-radius:8px;margin-top:4px;">
+          <div class="pl-lbl bold">당기순손실</div>
+          <div class="pl-bar-wrap"><div class="pl-bar" style="width:67%;background:rgba(233,84,87,0.55);"></div></div>
+          <div class="pl-val neg" style="font-size:15px;">△11.6억</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card">
+          <div class="card-head gold">판관비 주요 항목 (17.4억)</div>
+          <div class="br"><span class="n">직원 급여</span><span class="v">9.4억 (54%)</span></div>
+          <div class="br"><span class="n">지급임차료</span><span class="v">2.1억 (12%)</span></div>
+          <div class="br"><span class="n">연구소 소모품</span><span class="v">1.04억 (6%)</span></div>
+          <div class="br"><span class="n">건물관리비</span><span class="v">0.79억 (4.5%)</span></div>
+          <div class="br"><span class="n">복리후생비</span><span class="v">0.86억 (5%)</span></div>
+        </div>
+        <div class="card plain" style="background:var(--key-pale);border-color:var(--key-border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div><div style="font-size:10px;color:var(--gray);margin-bottom:2px;">전기 순손실</div><div style="font-size:18px;font-weight:800;color:var(--gray2);">△10.2억</div></div>
+            <div style="font-size:22px;color:var(--gray2);">→</div>
+            <div><div style="font-size:10px;color:var(--gray);margin-bottom:2px;">당기 순손실</div><div style="font-size:18px;font-weight:800;color:var(--key);">△11.6억</div></div>
+            <div style="font-size:22px;color:var(--gray2);">→</div>
+            <div><div style="font-size:10px;color:var(--key);margin-bottom:2px;">매출 성장률</div><div style="font-size:18px;font-weight:800;color:var(--green);">+1,078%</div></div>
+          </div>
+        </div>
+        <div class="note-bar gold">📌 손실 해석: 연구인력 확충(6명 신규), 전국 센터 인프라 구축 투자 집중으로 판관비 증가. 2026년 센터 풀가동 시 수익성 전환 목표.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5: 투자 유치 -->
+<div class="slide" id="s5">
+  <div class="topbar"><div class="lbl">제1의안 · 투자 유치 현황</div><div class="ttl">2025년 투자 유치 실적</div></div>
+  <div class="s-wrap">
+    <div class="tcol">
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div class="tl-row">
+          <div class="tl-line"><div class="tl-dot"></div><div class="tl-vline"></div></div>
+          <div class="tl-card"><div class="tl-period">2025. 2Q · 신주발행</div><div class="tl-name">리바이탈투자조합 제4호</div><div class="tl-amount">6.07억원</div><div class="tl-note">우선주 발행 · 기존 투자자 후속 투자</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-line"><div class="tl-dot"></div><div class="tl-vline"></div></div>
+          <div class="tl-card" style="background:var(--key-pale);border-color:var(--key-border);"><div class="tl-period">2025. 3Q · 시리즈 A</div><div class="tl-name">하나캐피탈 + SK증권 글로벌K뷰티1호</div><div class="tl-amount" style="font-size:22px;">40.57억원</div><div class="tl-note">이지스아시아 주도 · K뷰티·헬스케어 섹터 투자</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-line"><div class="tl-dot"></div><div class="tl-vline"></div></div>
+          <div class="tl-card"><div class="tl-period">2025. 4Q · 신주발행</div><div class="tl-name">리바이탈투자조합 제5호</div><div class="tl-amount">3.95억원</div><div class="tl-note">우선주 발행 · 지속적 후속 투자</div></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-line"><div class="tl-dot gold"></div></div>
+          <div class="tl-card gold"><div class="tl-period gold">2025. 11월 · 정부과제</div><div class="tl-name">중소벤처기업부 스케일업 TIPS R&amp;D</div><div class="tl-amount gold">12억원</div><div class="tl-note">3년간 지원 · ECM 오가노이드 지지체 개발</div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card plain" style="background:var(--key-pale);border-color:var(--key-border);">
+          <div style="font-size:10px;color:var(--key);font-weight:700;margin-bottom:5px;letter-spacing:1px;">2025년 민간 투자 합계</div>
+          <div style="font-size:30px;font-weight:900;color:var(--key);">약 50.6억원</div>
+          <div style="font-size:11px;color:var(--gray);">조달 완료</div>
+        </div>
+        <div class="card plain" style="background:#FFFBF0;border-color:#F0D9AA;">
+          <div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:5px;letter-spacing:1px;">정부 R&amp;D 과제 포함 총계</div>
+          <div style="font-size:30px;font-weight:900;color:var(--gold);">약 62.6억원</div>
+          <div style="font-size:11px;color:var(--gray);">확보</div>
+        </div>
+        <div class="card">
+          <div class="card-head">주요 투자자 / 기관</div>
+          <div style="font-size:11.5px;color:var(--gray);line-height:2.1;">
+            • 이지스아시아 (K뷰티 헬스케어 섹터 투자)<br>
+            • SK증권 · 하나캐피탈 (글로벌K뷰티 1호)<br>
+            • 리바이탈 투자조합 (제4·5호)<br>
+            • 중소벤처기업부 (스케일업 TIPS R&amp;D)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6: 임원보수 -->
+<div class="slide" id="s6">
+  <div class="topbar"><div class="lbl">제2의안 · 결의 안건</div><div class="ttl">임원보수 한도 승인의 건</div></div>
+  <div class="s-wrap">
+    <div class="resolution-box">
+      <div class="r-lbl">의안 내용</div>
+      <div class="r-title">2026년도 등기임원 전체 보수 한도 (안)</div>
+      <div class="r-amount">5억원</div>
+      <div class="r-sub">오억 원 정 (₩ 500,000,000)</div>
+    </div>
+    <div class="tcol">
+      <div class="card">
+        <div class="card-head">등기임원 현황 (3인)</div>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr><th class="thr">직책</th><th class="thr">성명</th><th class="thr">비고</th></tr></thead>
+          <tbody>
+            <tr><td class="tdc">대표이사</td><td class="tdc" style="font-weight:700;">조승욱</td><td class="tdc">유급</td></tr>
+            <tr><td class="tdc">사내이사</td><td class="tdc" style="font-weight:700;">정은숙</td><td class="tdc">유급</td></tr>
+            <tr><td class="tdc" style="border-bottom:none;">사내이사</td><td class="tdc" style="font-weight:700;border-bottom:none;">김남철</td><td class="tdc" style="border-bottom:none;color:var(--gray);">무급 (365mc 대표)</td></tr>
+          </tbody>
+        </table>
+        <div class="note-bar" style="margin-top:10px;">※ 등기임원 3인 중 1인(김남철)은 무급 등기이사<br>※ 유급 등기임원 2인 기준 보수 한도 설정</div>
+      </div>
+      <div class="card">
+        <div class="card-head">결의 요건</div>
+        <div class="br"><span class="n">안건 유형</span><span class="v">보통결의</span></div>
+        <div class="br"><span class="n">의결 정족수</span><span class="v">출석주주 과반수</span></div>
+        <div class="br"><span class="n">적용 기간</span><span class="v">2026. 1. 1 ~ 12. 31</span></div>
+        <div class="br"><span class="n">관련 법령</span><span class="v">상법 제388조</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7: 회사 개요 -->
+<div class="slide" id="s7">
+  <div class="topbar"><div class="lbl">SECTION 02 · 회사 현황</div><div class="ttl">회사 개요</div></div>
+  <div class="s-wrap">
+    <div class="tcol">
+      <div class="card">
+        <div class="card-head">기업 정보</div>
+        <div class="br"><span class="n">회사명</span><span class="v">주식회사 모닛셀</span></div>
+        <div class="br"><span class="n">설립일</span><span class="v">2019년 11월 15일</span></div>
+        <div class="br"><span class="n">대표자</span><span class="v">조승욱</span></div>
+        <div class="br"><span class="n">기업규모</span><span class="v">중소기업 · 벤처기업</span></div>
+        <div class="br"><span class="n">본사</span><span class="v">강남구 테헤란로 520 삼안빌딩 7층</span></div>
+        <div class="br"><span class="n">연구소</span><span class="v">강남구 도산대로6길 8, 2층</span></div>
+        <div class="br"><span class="n">발행주식</span><span class="v">922,894주</span></div>
+        <div class="br"><span class="n">벤처기간</span><span class="v">2023.1.28 ~ 2026.1.27</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card">
+          <div class="card-head">임직원 현황 (2025.12 기준)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="background:var(--key-pale);border:1px solid var(--key-border);border-radius:8px;padding:7px 11px;"><div style="font-size:9px;color:var(--key);font-weight:600;">등기임원</div><div style="font-size:17px;font-weight:800;color:var(--dark);">3명</div></div>
+            <div style="background:var(--key-pale);border:1px solid var(--key-border);border-radius:8px;padding:7px 11px;"><div style="font-size:9px;color:var(--key);font-weight:600;">연구소</div><div style="font-size:17px;font-weight:800;color:var(--dark);">12명</div></div>
+            <div style="background:var(--key-pale);border:1px solid var(--key-border);border-radius:8px;padding:7px 11px;"><div style="font-size:9px;color:var(--key);font-weight:600;">사업개발</div><div style="font-size:17px;font-weight:800;color:var(--dark);">4명</div></div>
+            <div style="background:var(--key-pale);border:1px solid var(--key-border);border-radius:8px;padding:7px 11px;"><div style="font-size:9px;color:var(--key);font-weight:600;">경영지원</div><div style="font-size:17px;font-weight:800;color:var(--dark);">6명</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:32px;font-weight:900;color:var(--key);">25명</div>
+            <div style="font-size:11px;color:var(--gray);line-height:1.8;">총 임직원 (무급 등기이사 포함)<br>전분기 대비 +5명 · 연구원 6명 신규 채용</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">핵심 기술</div>
+          <div style="font-size:11.5px;color:var(--gray);line-height:2.2;">
+            🔬 자가지방유래 줄기세포(SVF) 추출·뱅킹 서비스<br>
+            💉 SVF 기반 스킨부스터·정맥주사(IV) 시술 서비스<br>
+            🧫 인체지방유래 ECM 생산·오가노이드 지지체 기술<br>
+            🏥 지방줄기세포센터 구축 컨설팅·장비 납품
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8: 매출 실적 -->
+<div class="slide" id="s8">
+  <div class="topbar"><div class="lbl">SECTION 02 · 사업 실적</div><div class="ttl">2025년 분기별 매출 실적</div></div>
+  <div class="s-wrap">
+    <div class="krow" style="margin-bottom:14px;">
+      <div class="kpi hi"><div class="kl">연간 매출</div><div class="kv">9.1억원</div><div class="kv2">목표 초과 달성</div></div>
+      <div class="kpi"><div class="kl">4Q 매출</div><div class="kv">6.16억원</div><div class="kv2">연간의 67.6%</div></div>
+      <div class="kpi rk"><div class="kl">전분기 대비 성장</div><div class="kv">+280%</div><div class="kv2">3Q→4Q 급성장</div></div>
+      <div class="kpi"><div class="kl">거래 기관</div><div class="kv">7개</div><div class="kv2">365mc 6 + 365웰 1</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:18px;">
+      <div>
+        <div style="font-size:10px;color:var(--gray2);margin-bottom:8px;">분기별 매출액 (단위: 억원)</div>
+        <div style="position:relative;width:100%;height:210px;"><canvas id="chartQtr"></canvas></div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--gray2);margin-bottom:8px;">4Q 거래처별 매출 구성</div>
+        <div style="position:relative;width:100%;height:210px;"><canvas id="chartDist"></canvas></div>
+      </div>
+    </div>
+    <div class="note-bar" style="margin-top:10px;">💡 <strong>4Q 급성장 배경</strong>: 부산병원(11월)·노원점(12월)·교대병원(12월)·대구병원(12월) 순차 오픈 + 컨설팅 용역 매출 인식</div>
+  </div>
+</div>
+
+<!-- 9: 센터 확장 -->
+<div class="slide" id="s9">
+  <div class="topbar"><div class="lbl">SECTION 02 · 사업 현황</div><div class="ttl">지방줄기세포센터 전국 확장 현황</div></div>
+  <div class="s-wrap">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+      <div class="center-card"><div class="cc-num">No.1 · 강남(신사)</div><div class="cc-name">365mc 강남점</div><div class="cc-when">2024.06 오픈</div><div class="cc-badge badge-green">✓ 운영 중</div></div>
+      <div class="center-card"><div class="cc-num">No.2 · 대전</div><div class="cc-name">365mc 대전병원</div><div class="cc-when">2025.08 오픈</div><div class="cc-badge badge-green">✓ 운영 중</div></div>
+      <div class="center-card"><div class="cc-num">No.3 · 부산</div><div class="cc-name">365mc 부산병원</div><div class="cc-when">2025.11 오픈</div><div class="cc-badge badge-green">✓ 운영 중</div></div>
+      <div class="center-card"><div class="cc-num">No.4 · 교대</div><div class="cc-name">365mc 교대병원</div><div class="cc-when">2025.12 오픈</div><div class="cc-badge badge-green">✓ 운영 중</div></div>
+      <div class="center-card"><div class="cc-num">No.5 · 노원</div><div class="cc-name">365mc 노원점</div><div class="cc-when">2025.12 오픈</div><div class="cc-badge badge-green">✓ 운영 중</div></div>
+      <div class="center-card"><div class="cc-num">No.6 · 대구</div><div class="cc-name">365mc 대구병원</div><div class="cc-when">2025.12 오픈</div><div class="cc-badge badge-green">✓ 운영 중</div></div>
+      <div class="center-card q1-done"><div class="cc-num red">No.7 · 영등포</div><div class="cc-name">365mc 영등포점</div><div class="cc-when">2026.1Q 오픈 완료</div><div class="cc-badge badge-red">✓ 2026 1Q 완료</div></div>
+      <div class="center-card q1-done"><div class="cc-num red">No.8 · 팽팽</div><div class="cc-name">팽팽클리닉</div><div class="cc-when">2026.1Q 오픈 완료</div><div class="cc-badge badge-red">✓ 2026 1Q 완료</div></div>
+      <div class="center-card q1-done"><div class="cc-num red">No.9 · 신촌</div><div class="cc-name">365mc 신촌점</div><div class="cc-when">2026.1Q 오픈 완료</div><div class="cc-badge badge-red">✓ 2026 1Q 완료</div></div>
+    </div>
+    <div style="background:#FFFBF0;border:1px solid #F0D9AA;border-radius:9px;padding:10px 14px;font-size:12px;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+      <div><strong>No.10~11</strong> · 인천 365mc병원 + 365웰 정형재활의학과의원</div>
+      <div class="cc-badge badge-gold" style="flex-shrink:0;">⏳ 2026 2Q 예정</div>
+    </div>
+    <div class="milestone-bar">
+      <div class="ms-item"><div class="ms-lbl" style="color:var(--gray2);">2025년 말</div><div class="ms-val" style="color:var(--white);">6개소</div></div>
+      <div class="ms-div"></div>
+      <div class="ms-item"><div class="ms-lbl" style="color:var(--key2);">2026 1Q 완료</div><div class="ms-val" style="color:var(--key2);">9개소</div></div>
+      <div class="ms-div"></div>
+      <div class="ms-item"><div class="ms-lbl" style="color:var(--gold);">2026년 목표</div><div class="ms-val" style="color:var(--gold);">15개소</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 10: 지분 현황 -->
+<div class="slide" id="s10">
+  <div class="topbar"><div class="lbl">SECTION 02 · 지분 현황</div><div class="ttl">주주 현황 (2025.12.31 기준)</div></div>
+  <div class="s-wrap">
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;">
+      <div class="card">
+        <table class="share-tbl">
+          <thead><tr><th class="thr">주주명</th><th class="thr" style="text-align:right;">보유주식</th><th class="thr" style="text-align:right;">지분율</th><th class="thr" style="width:70px;"></th></tr></thead>
+          <tbody id="shareTbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card"><div class="card-head">주요 변동사항</div><div style="font-size:12px;color:var(--gray);line-height:2.1;">㈜삼육오엠씨 지분율<br><span style="color:var(--gray2);">47.20%</span> → <span style="color:var(--gray2);">41.94%</span> → <strong style="color:var(--key);">41.49%</strong><br>신주발행으로 인한 희석</div></div>
+        <div class="card"><div class="card-head">주식 구성</div><div style="font-size:12px;color:var(--gray);line-height:2.1;">보통주: <strong style="color:var(--dark);">559,264주</strong> (60.6%)<br>우선주: <strong style="color:var(--dark);">363,630주</strong> (39.4%)<br>총 발행주식: <strong style="color:var(--key);">922,894주</strong></div></div>
+        <div class="card plain" style="background:var(--navy);"><div class="card-head" style="color:var(--key2);">대주주 구조</div><div style="font-size:12px;color:var(--gray2);line-height:2.1;">최대주주 365mc <strong style="color:var(--white);">41.49%</strong><br>재무적 투자자 <strong style="color:var(--white);">약 29%</strong><br>경영진·창업멤버 <strong style="color:var(--white);">약 4%</strong></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11: 2026 인프라 -->
+<div class="slide" id="s11">
+  <div class="topbar"><div class="lbl">SECTION 02 · 2026년 계획 (1/3)</div><div class="ttl">인프라 확장 계획</div></div>
+  <div class="s-wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="plan-card"><div class="plan-icon">🏥</div><div><div class="plan-t">센터 15개소 확장 목표</div><div class="plan-d">✓ 1Q 완료: 영등포·팽팽·신촌 (7~9호점)<br>⏳ 2Q 예정: 인천·365웰 (10~11호점)<br>📋 하반기: 추가 신규 거점 4개소 목표</div></div></div>
+      <div class="plan-card"><div class="plan-icon">🌐</div><div><div class="plan-t">해외 의료관광 수요 흡수</div><div class="plan-d">일본 등 유출되던 줄기세포 의료관광 수요를 국내 유입하는 기반 마련. 365mc 네트워크 동반성장 구조 강화.</div></div></div>
+      <div class="plan-card"><div class="plan-icon">🦴</div><div><div class="plan-t">365웰 정형외과 신의료기술</div><div class="plan-d">지방줄기세포 기반 무릎 골관절염 신의료기술 서비스 확대. 365웰 자체 센터 설립(2Q) 예정.</div></div></div>
+      <div class="plan-card"><div class="plan-icon">💊</div><div><div class="plan-t">SVF 서비스 라인업 강화</div><div class="plan-d">뱅킹·스킨부스터·IV 주사 기존 3종에 신규 시술 프로토콜 추가. 객단가 및 재방문율 제고.</div></div></div>
+    </div>
+    <div class="milestone-bar">
+      <div class="ms-item"><div class="ms-lbl" style="color:var(--gray2);">2025년 말</div><div class="ms-val" style="color:var(--white);">6개소</div></div>
+      <div class="ms-div"></div>
+      <div class="ms-item"><div class="ms-lbl" style="color:var(--key2);">2026 1Q 완료</div><div class="ms-val" style="color:var(--key2);">9개소</div></div>
+      <div class="ms-div"></div>
+      <div class="ms-item"><div class="ms-lbl" style="color:var(--gold);">2026년 목표</div><div class="ms-val" style="color:var(--gold);">15개소</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 12: 2026 R&D -->
+<div class="slide" id="s12">
+  <div class="topbar"><div class="lbl">SECTION 02 · 2026년 계획 (2/3)</div><div class="ttl">R&amp;D 과제 계획</div></div>
+  <div class="s-wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="plan-card"><div class="plan-icon">🧬</div><div><div class="plan-t">스케일업 TIPS R&amp;D 본격 수행</div><div class="plan-d">중소벤처기업부 사업 최종 선정. 3년간 12억원 확보.<br>인체 폐지방 → 고순도 ECM 전환 자동화 공정 착수.</div></div></div>
+      <div class="plan-card gold-l"><div class="plan-icon gold">⚗️</div><div><div class="plan-t">ECM 오가노이드 지지체 개발</div><div class="plan-d">동물유래 매트리젤 한계 극복한 임상 적용 가능 지지체 표준 개발. 창상피복제·필러·바이오잉크 파이프라인 확장.</div></div></div>
+      <div class="plan-card"><div class="plan-icon">🤖</div><div><div class="plan-t">핵심 개발 항목 (4대 과제)</div><div class="plan-d">① 초고속 탈세포화 공정 설계<br>② 대량생산 자동화 시스템 구축<br>③ 품질 표준화 · ④ 오가노이드 배양 적합성 검증</div></div></div>
+      <div class="plan-card gold-l"><div class="plan-icon gold">🌍</div><div><div class="plan-t">글로벌 시장 진입 목표</div><div class="plan-d">인체 지방유래 ECM 기반 오가노이드 지지체로 글로벌 시장에 새로운 기술 표준 제시. K-바이오 수출 기반 마련.</div></div></div>
+    </div>
+    <div class="bottom-summary">
+      <div class="bs-item"><div class="bs-lbl">R&amp;D 과제 확보</div><div class="bs-val" style="color:var(--key);">12억원 (3년)</div></div>
+      <div class="bs-div"></div>
+      <div class="bs-item"><div class="bs-lbl">완료 목표</div><div class="bs-val" style="color:var(--white);">2028년 4Q</div></div>
+      <div class="bs-div"></div>
+      <div class="bs-item"><div class="bs-lbl">핵심 목표</div><div class="bs-val" style="color:var(--gold);font-size:15px;">Xeno-free 지지체</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 13: 2026 재무 -->
+<div class="slide" id="s13">
+  <div class="topbar"><div class="lbl">SECTION 02 · 2026년 계획 (3/3)</div><div class="ttl">재무 목표</div></div>
+  <div class="s-wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="plan-card"><div class="plan-icon">📈</div><div><div class="plan-t">매출 고성장 지속</div><div class="plan-d">센터 15개소 풀가동 시 서비스·컨설팅 매출 대폭 증가.<br>2025년(9.1억) 대비 2배 이상 성장 목표.</div></div></div>
+      <div class="plan-card gold-l"><div class="plan-icon gold">💰</div><div><div class="plan-t">수익성 개선 본격화</div><div class="plan-d">인프라 구축 완료로 추가 고정비 최소화.<br>기존 센터 운영 정상화 → 영업적자 축소 → 흑자 전환 목표.</div></div></div>
+      <div class="plan-card"><div class="plan-icon">🏦</div><div><div class="plan-t">투자 자금 효율적 운용</div><div class="plan-d">시리즈A 조달 자금(40.57억)을 센터 확장·R&amp;D·인력에 집중 투입. 정기예금(20억)+단기매매증권(12.3억) 유동성 안정 유지.</div></div></div>
+      <div class="plan-card gold-l"><div class="plan-icon gold">🚀</div><div><div class="plan-t">시리즈 B 추진 검토</div><div class="plan-d">센터 15개소 안정화 및 ECM R&amp;D 성과 달성 시 글로벌 확장·기술사업화를 위한 시리즈 B 투자유치 추진 검토.</div></div></div>
+    </div>
+    <div class="bottom-summary">
+      <div class="bs-item"><div class="bs-lbl">2025 매출 → 2026 목표</div><div class="bs-val" style="color:var(--key);">9.1억 → 20억+</div></div>
+      <div class="bs-div"></div>
+      <div class="bs-item"><div class="bs-lbl">2025 영업손실 → 목표</div><div class="bs-val" style="color:var(--white);font-size:15px;">△11.9억 → 손익분기점</div></div>
+      <div class="bs-div"></div>
+      <div class="bs-item"><div class="bs-lbl">중장기 목표</div><div class="bs-val" style="color:var(--gold);font-size:15px;">글로벌 K-바이오</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 14: CLOSE -->
+<div class="slide" id="s14">
+  <div class="close-inner">
+    <div style="font-size:54px;font-weight:900;letter-spacing:-2px;margin-bottom:12px;color:var(--white);">감사합니다</div>
+    <div style="width:60px;height:4px;background:var(--key);border-radius:2px;margin-bottom:22px;"></div>
+    <div style="font-size:13px;color:var(--gray2);line-height:2.3;margin-bottom:28px;">
+      주식회사 모닛셀 제7기 정기주주총회 &nbsp;|&nbsp; 2026년 3월 31일<br>
+      <span style="color:var(--key2);font-style:italic;">지방줄기세포 기반 바이오·헬스케어 혁신을 선도하겠습니다.</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <div style="background:rgba(233,84,87,0.12);border:1px solid rgba(233,84,87,0.3);color:var(--key2);font-size:12px;padding:6px 16px;border-radius:20px;">www.monitcell.com</div>
+      <div style="background:rgba(233,84,87,0.12);border:1px solid rgba(233,84,87,0.3);color:var(--key2);font-size:12px;padding:6px 16px;border-radius:20px;">02-2038-3386</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- slide-area -->
+
+<div id="bbar">
+  <button class="btn" id="prevBtn" onclick="prev()">← 이전</button>
+  <div style="display:flex;align-items:center;gap:12px;flex:1;justify-content:center;">
+    <span id="sc" style="color:var(--gray2);font-size:12px;">1 / 15</span>
+    <div class="pb"><div class="pf" id="pf" style="width:6.7%"></div></div>
+    <span id="stag" style="font-size:10px;color:var(--gray2);letter-spacing:1px;"></span>
+  </div>
+  <button class="btn" id="nextBtn" onclick="next()">다음 →</button>
+</div>
+</div><!-- main -->
+</div><!-- app -->
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const nis = document.querySelectorAll('.ni');
+const total = slides.length;
+let cur = 0;
+const tags = ['표지','안건 목록','제1의안·결산보고','제1의안·재무상태표','제1의안·손익계산서','제1의안·투자유치','제2의안·임원보수','섹션2·회사개요','섹션2·매출실적','섹션2·센터현황','섹션2·지분현황','섹션2·인프라계획','섹션2·R&D계획','섹션2·재무목표','클로징'];
+
+function goSlide(n) {
+  slides[cur].classList.remove('active'); nis[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(n, total - 1));
+  slides[cur].classList.add('active'); nis[cur].classList.add('active');
+  nis[cur].scrollIntoView({ block:'nearest', behavior:'smooth' });
+  document.getElementById('sc').textContent = (cur+1) + ' / ' + total;
+  document.getElementById('pf').style.width = ((cur+1)/total*100) + '%';
+  document.getElementById('stag').textContent = tags[cur];
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').disabled = cur === total - 1;
+  if (cur === 8 && !window._cDone) renderCharts();
+}
+function next() { goSlide(cur+1); }
+function prev() { goSlide(cur-1); }
+nis.forEach((el,i) => el.addEventListener('click', () => goSlide(i)));
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') next();
+  if (e.key==='ArrowLeft'||e.key==='ArrowUp') prev();
+});
+
+// Share table
+const shareholders = [
+  ['㈜ 삼육오엠씨',     '382,895주','41.49%',41.49,'#e95457'],
+  ['㈜ 뉴플라이트',     '238,769주','25.87%',25.87,'#5588CC'],
+  ['하나캐피탈-SK증권 글로벌K뷰티1호','127,217주','13.78%',13.78,'#E8A030'],
+  ['펠컨 제2호 투자조합','38,115주','4.13%',4.13,'#9DAABB'],
+  ['㈜ 메리츠증권',     '23,967주','2.60%',2.60,'#9DAABB'],
+  ['리바이탈 투자조합 (3·4·5호)', '30,709주','3.32%',3.32,'#9DAABB'],
+  ['조승욱 (대표이사)', '18,557주','2.01%',2.01,'#9DAABB'],
+  ['기타 (IBK, 정은숙 외)','42,108주','4.79%',4.79,'#B0BAD0'],
+  ['합계',             '922,894주','100%',100,'#e95457'],
+];
+const tbody = document.getElementById('shareTbody');
+shareholders.forEach((r, i) => {
+  const isTotal = i === shareholders.length - 1;
+  const tr = document.createElement('tr');
+  if (isTotal) tr.classList.add('total');
+  tr.innerHTML = `
+    <td class="tdc" style="${isTotal?'font-weight:700;':''}border-bottom:${isTotal?'none':'1px solid #EEF1F6'};">${r[0]}</td>
+    <td class="tdc" style="text-align:right;${isTotal?'font-weight:700;':''}color:${r[4]};border-bottom:${isTotal?'none':'1px solid #EEF1F6'};">${r[1]}</td>
+    <td class="tdc" style="text-align:right;font-weight:700;color:${r[4]};border-bottom:${isTotal?'none':'1px solid #EEF1F6'};">${r[2]}</td>
+    <td class="tdc" style="border-bottom:${isTotal?'none':'1px solid #EEF1F6'};">
+      ${!isTotal ? `<div class="share-bar-bg"><div class="share-bar-fill" style="width:${r[3]}%;background:${r[4]};"></div></div>` : ''}
+    </td>`;
+  tbody.appendChild(tr);
+});
+
+function renderCharts() {
+  window._cDone = true;
+  const gc = 'rgba(0,0,0,0.06)', tc = '#6B7592';
+  new Chart(document.getElementById('chartQtr'), {
+    type: 'bar',
+    data: {
+      labels: ['Q1 (1~3월)','Q2 (4~6월)','Q3 (7~9월)','Q4 (10~12월)'],
+      datasets: [{ label:'매출액', data:[0.36, 0.97, 1.62, 6.16],
+        backgroundColor: ['rgba(233,84,87,0.22)','rgba(233,84,87,0.40)','rgba(233,84,87,0.60)','rgba(233,84,87,0.90)'],
+        borderColor: ['rgba(233,84,87,0.5)','rgba(233,84,87,0.7)','rgba(233,84,87,0.85)','rgba(233,84,87,1)'],
+        borderWidth: 1, borderRadius: 5 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(26,37,64,0.95)',titleColor:'#f07275',bodyColor:'#9DAABB',callbacks:{label:ctx=>'  '+ctx.parsed.y.toFixed(2)+'억원'}} },
+      scales:{ x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}}, y:{ticks:{color:tc,font:{size:10},callback:v=>v+'억'},grid:{color:gc}} }}
+  });
+  new Chart(document.getElementById('chartDist'), {
+    type: 'doughnut',
+    data: {
+      labels: ['용역컨설팅(㈜365mc)','강남(신사)','부산','교대','대전','노원','대구·기타'],
+      datasets: [{ data:[336, 113.1, 54.4, 39.4, 29.9, 23.4, 22.7],
+        backgroundColor: ['#e95457','#E8A030','#4A90D9','#7BC67E','#C07BE8','#38A169','#9DAABB'],
+        borderColor: 'rgba(244,246,250,0.8)', borderWidth: 2.5 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'58%',
+      plugins:{ legend:{display:true,position:'right',labels:{color:tc,font:{size:10},boxWidth:11,padding:8}},
+        tooltip:{backgroundColor:'rgba(26,37,64,0.95)',titleColor:'#f07275',bodyColor:'#9DAABB',callbacks:{label:ctx=>'  '+ctx.parsed.toFixed(1)+'백만원'}} }}
+  });
+}
+goSlide(0);
+</script>
+</body>
+</html>
